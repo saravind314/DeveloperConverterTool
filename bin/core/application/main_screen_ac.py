@@ -1,6 +1,7 @@
 from tkinter import *
 import tkinter.scrolledtext as scrolledtext
 from tkinter import filedialog
+from bin.utils.logging.logger_handler import logger
 
 root = Tk()
 root.title('Developer Converter Tools')
@@ -65,6 +66,7 @@ convert_button = Button(root, text="Convert",font=("Helvetica", 9, 'bold'), comm
 
 def run():
     try:
+        logger.info("Inside execution of main screen")
         root.mainloop()
     except Exception as e:
         print(str(e))
