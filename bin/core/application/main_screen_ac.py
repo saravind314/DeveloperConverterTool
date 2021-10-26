@@ -1,7 +1,10 @@
 from tkinter import *
+import tkinter
 import tkinter.scrolledtext as scrolledtext
 from tkinter import filedialog
 from bin.utils.logging.logger_handler import logger
+from bin.utils.file_handler_util import FileHandler
+
 
 root = Tk()
 root.title('Developer Converter Tools')
@@ -11,19 +14,23 @@ root.resizable(0,0)
 
 
 
-def browse_files():
+def browse_files(input_text):
 
     file_path = filedialog.askopenfilename(initialdir="/",
                                           title="Select a File",
-                                          filetypes=(("Text files",
+                                          filetypes=(("Text Document",
                                                       "*.txt*"),
-                                                     ("all files",
+                                                     ("All Files",
                                                       "*.*")))
 
     file_name = file_path.split("/")[-1]
-
-    file_input_canvas.create_text(250, 25, font=('Helvetica', 9, 'bold'),
-                                  text="File Selected: " + file_name, width=500)
+    if file_path:
+        file_input_canvas.create_text(250, 25, font=('Helvetica', 9, 'bold'),
+                                      text="File Selected: " + file_name, width=500)
+    file_handler_obj = FileHandler()
+    file_content = file_handler_obj.read_file(file_path)
+    if file_content:
+        input_text.insert(tkinter.INSERT, file_content)
 
 
 def convert_click(root, action, input_text):
@@ -33,7 +40,17 @@ def convert_click(root, action, input_text):
         root.clipboard_append(text)
 
     elif action == "choose_file":
-        browse_files()
+        browse_files(input_text)
+
+    elif action == "convert_download":
+        files = [('All Files', '*.*'),
+                 ('Text Document', '*.txt')]
+        file_obj = filedialog.asksaveasfile(mode='w', filetypes = files, defaultextension=files)
+        if file_obj is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        data = str(input_text.get(1.0, END))
+        file_obj.write(data)
+        file_obj.close()
 
 
 
@@ -61,7 +78,7 @@ convert_from_dropdown = OptionMenu(root, convert_from,  *options,).place(x=90,y=
 convert_to_dropdown = OptionMenu(root,convert_to,  *options).place(x=360, y=510, width=220, height=40)
 # convert_to_dropdown.config(bg="#D5E8D4")
 
-convert_download_button = Button(root, text="Convert and Download",font=("Helvetica", 10, 'bold'), command=lambda: convert_click(action="convert_download"), bg="#DAE8FC").place(x=360, y=570, width=220, height=40)
+convert_download_button = Button(root, text="Convert and Download",font=("Helvetica", 10, 'bold'), command=lambda: convert_click(root=root, action="convert_download", input_text=input_text), bg="#DAE8FC").place(x=360, y=570, width=220, height=40)
 convert_button = Button(root, text="Convert",font=("Helvetica", 9, 'bold'), command=lambda: convert_click("convert"), bg="#DAE8FC").place(x=90, y = 570, width=220, height=40)
 
 def run():
